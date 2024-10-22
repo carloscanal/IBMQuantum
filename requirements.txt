@@ -1,0 +1,7 @@
+jupyter
+notebook
+environs
+ipykernel			# IPython kernel for Jupyter
+qiskit[visualization]		# qiskit package with optional module for visualization and Jupyter notebooks
+qiskit-ibm-runtime
+
