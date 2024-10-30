@@ -1,9 +1,7 @@
 jupyter
 notebook
-ipykernel			# IPython kernel for Jupyter
-
-qiskit[visualization]		# qiskit package with optional module for visualization and Jupyter notebooks
+ipykernel		# IPython kernel for Jupyter
+qiskit[visualization]	# qiskit package with optional module for visualization and Jupyter notebooks
 qiskit-ibm-runtime
-qiskit-aer
-
-environs
+qiskit-aer		# qiskit simulators with realistic noise models
+environs		# for reading .env file
