@@ -1,0 +1,8 @@
+environs
+jsonify
+uvicorn
+fastapi
+
+qiskit[visualization]	# qiskit package with optional module for visualization and Jupyter notebooks
+qiskit-ibm-runtime
+qiskit-aer		# qiskit simulators with realistic noise models
