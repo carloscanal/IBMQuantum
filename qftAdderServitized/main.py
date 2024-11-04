@@ -16,7 +16,7 @@ async def root() :
     return "Implemented with FastAPI. See /docs for details"
 
 # POST a qftAdder Job with qpu and shots in body
-@api.post("/qftAdder", status_code=201)                      
+@api.post("/jobs/qftAdder", status_code=201)                      
 async def qftAdder(job: Annotated[Job, 
                         Body(examples=[{"backend" : "simulator",
                                         "shots": 1000},
@@ -32,7 +32,7 @@ async def qftAdder(job: Annotated[Job,
     return response
 
 # GET the results of a Job (of any kind)
-@api.get("/job/{job_id}")                      
+@api.get("/jobs/{job_id}")                      
 async def results(job_id : str): # Annotated[str,examples=["cwkzfrf31we00088d18g","cwkxypj31we00088cy7g"]]):
     
     response = job_results(job_id)
@@ -42,7 +42,7 @@ async def results(job_id : str): # Annotated[str,examples=["cwkzfrf31we00088d18g
 # POST to show a plotter with job details as body parameters
 #      probably it should be a QUERY request, if it is finally implemented
 #
-@api.post("/plot", status_code=201)                      
+@api.post("/plots", status_code=201)                      
 async def plot(job : Annotated[Job, 
                      Body(examples=[{"job_id": "cwkzfrf31we00088d18g",
                                      "backend" : "ibm_brisbane",
@@ -51,8 +51,7 @@ async def plot(job : Annotated[Job,
                                      "counts": {"1000": 25, "1001": 41, "1010": 12, "1011": 72, "1100": 7, "1101": 23, "1110": 24,
                                                 "1111": 136, "0011": 115, "0111": 394, "0101": 55, "0110": 49, "0100": 8, "0001": 21,
                                                 "0000": 13, "0010": 5}}]
-
-                        )]):
+                         )]):
     
     response = job_plot(job)
     return response
