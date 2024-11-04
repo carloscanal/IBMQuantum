@@ -2,11 +2,7 @@
 # coding: utf-8
 
 from environs import Env
-
 from matplotlib import pyplot as plt
-
-# import circuit from from draperQFTAdder4Q.py
-from draperQFTAdder4Q import circuit as draperQFTAdderCircuit
 
 # import Qiskit libraries
 from qiskit import QuantumCircuit
@@ -16,6 +12,9 @@ from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit_ibm_runtime import QiskitRuntimeService
 from qiskit_ibm_runtime import SamplerV2 as Sampler
 from qiskit_ibm_runtime.fake_provider import FakeAlmadenV2
+
+from draperQFTAdder4Q import circuit as draperQFTAdderCircuit
+from job import Job
 
 # Read the IBM API token from the the .env file
 
@@ -28,59 +27,76 @@ token = env('IBM_QUANTUM_TOKEN')
 
 print('>>>> Token: ' + token[:5] + '...')     # Check that the starting characters of the token are printed
 
-# define the list of QPUs available
+# runs the circuit either on simulator or the IBM Quantym Platform
+def run(job) :
 
-qpus = ["simulator", "least_busy_QPU", "ibm_brisbane", "ibm_sherbrooke", "ibm_kyiv"]
-
-
-# run the circuit on IBM Quantym Platform
-def run(machine, shots):
     circuit = draperQFTAdderCircuit()
 
-    if machine == "simulator":
-        backend = FakeAlmadenV2()      
-        backend_name = backend.name
+    if job.backend == "simulator":
+        ibm_backend = FakeAlmadenV2()      
+        backend_name = ibm_backend.name
     else: 
         service = QiskitRuntimeService(channel="ibm_quantum", token=token)
 
-        if machine == "least_busy_QPU":
-            backend = service.least_busy(simulator=False, operational=True)
+        if job.backend == "least_busy_QPU":
+            ibm_backend = service.least_busy(simulator=False, operational=True)
         else:
-            backend = service.get_backend(machine)
+            ibm_backend = service.backend(name=job.backend)
         
-        backend_name = backend.name
+        backend_name = ibm_backend.name
 
-    pm = generate_preset_pass_manager(backend=backend, optimization_level=1)
+    pm = generate_preset_pass_manager(backend=ibm_backend, optimization_level=1)
     isa_circuit = pm.run(circuit)
 
-    if machine != "simulator" :
-        backend = Sampler(mode=backend)
+    if job.backend != "simulator" :
+        ibm_backend = Sampler(mode=ibm_backend)
 
-    job = backend.run([isa_circuit], shots=int(shots))
-    print(f'>>>> Job ID: {job.job_id()} ({job.status()}) on {backend_name}, {shots} shots)')
+    ibm_job = ibm_backend.run([isa_circuit], shots=job.shots)
+    print(f'>>>> Job ID: {ibm_job.job_id()} ({ibm_job.status()}) on {backend_name}, {job.shots} shots)')
 
-    if machine == "simulator" :
-        return results(job=job, job_id="last_simulation")
-    else:  
-        return job.job_id()
-
-def results(job, job_id) :   # "last_simulation", or alternatively a job_id previously run on the platform
-
-    if job_id == "last_simulation":
-        result = job.result()
+    if job.backend == "simulator" :
+        job.counts = ibm_job.result().get_counts()
     else:
-        service = QiskitRuntimeService(channel="ibm_quantum", token=token)
-        job = service.job(job_id)
-        result = job.result()[0].data.c
+        job.counts = {}
 
-    counts = result.get_counts()
-    print(counts)
+    # print(job.counts)
+
+    job.job_id = ibm_job.job_id()
+    job.backend = backend_name
+    job.status = str(ibm_job.status())
+
+    return job
+
+# gets the results from a job hardware run
+def results(job_id) :
+    
+    service = QiskitRuntimeService(channel="ibm_quantum", token=token)
+    ibm_job = service.job(job_id)
+
+    response = Job()
+    response.job_id = job_id
+    response.backend = ibm_job.backend().name
+    response.status = str(ibm_job.status())
+
+    if response.status == "DONE" :
+        results = ibm_job.result()[0].data.c
+        response.shots = results.num_shots
+        response.counts = results.get_counts()
+    else: # Job still pending
+        response.shots = 0
+        response.counts = {}
+
+    return response
+  
+# plots the results of a job
+def plot(job) : 
 
     plt.rcParams["figure.figsize"] = (20,8)
-    plt.bar(counts.keys(), counts.values())
+    plt.bar(job.counts.keys(), job.counts.values())
     plt.xlabel('States')
     plt.ylabel('Values')
 
     plt.show()
 
-    return counts
+    return job
+

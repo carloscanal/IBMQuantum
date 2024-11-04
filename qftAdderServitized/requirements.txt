@@ -2,6 +2,8 @@ environs
 jsonify
 uvicorn
 fastapi
+pydantic
+typing
 
 qiskit[visualization]	# qiskit package with optional module for visualization and Jupyter notebooks
 qiskit-ibm-runtime
