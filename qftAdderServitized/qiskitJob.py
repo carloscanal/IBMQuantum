@@ -36,8 +36,10 @@ def run(job) :
         ibm_backend = FakeAlmadenV2()      
         backend_name = ibm_backend.name
     else: 
-        service = QiskitRuntimeService(channel="ibm_quantum", token=token)
-
+    
+        service = QiskitRuntimeService(channel="ibm_quantum_platform", token=token)
+        # service = QiskitRuntimeService(token=token)
+    
         if job.backend == "least_busy_QPU":
             ibm_backend = service.least_busy(simulator=False, operational=True)
         else:
@@ -69,8 +71,9 @@ def run(job) :
 
 # gets the results from a job hardware run
 def results(job_id) :
+
+    service = QiskitRuntimeService(channel="ibm_quantum_platform", token=token)
     
-    service = QiskitRuntimeService(channel="ibm_quantum", token=token)
     ibm_job = service.job(job_id)
 
     response = Job()

@@ -7,7 +7,7 @@ from typing import Annotated                        # typing, anotacionesiones d
 from job import Job, qpus
 from qiskitJob import run as job_run, results as job_results, plot as job_plot
 
-# Define a FastAPI app with a GET shor method
+# Define a FastAPI app with a GET QFTAdder method
 
 api = FastAPI()
 
@@ -20,7 +20,7 @@ async def root() :
 async def qftAdder(job: Annotated[Job, 
                         Body(examples=[{"backend" : "simulator",
                                         "shots": 1000},
-                                       {"backend" : "ibm_sherbrooke",
+                                       {"backend" : "ibm_fez",
                                         "shots": 5000}]
                         )]):
 
