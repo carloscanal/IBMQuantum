@@ -65,12 +65,12 @@ def circuit() :
   circuit = QuantumCircuit(qreg_q, creg_c)
 
   # Input: qubits 0 and 1 in superposition
-  # circuit.h(qreg_q[0])
-  # circuit.h(qreg_q[1])
+  circuit.h(qreg_q[0])
+  circuit.h(qreg_q[1])
 
   # Alternative input: 0110 (6)
-  circuit.x(qreg_q[1])
-  circuit.x(qreg_q[2])
+  # circuit.x(qreg_q[1])
+  # circuit.x(qreg_q[2])
 
   circuit.append(draperQFTAdder4Q(), [qreg_q[0], qreg_q[1], qreg_q[2], qreg_q[3]])
 
